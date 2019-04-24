@@ -1,6 +1,8 @@
 package rau.service.controllers;
 
 import com.google.gson.Gson;
+import org.springframework.core.io.InputStreamResource;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -9,9 +11,13 @@ import org.springframework.web.multipart.MultipartFile;
 import org.xml.sax.SAXException;
 import rau.service.service.XMLService;
 
+import javax.annotation.Resource;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.stream.XMLStreamException;
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.List;
 
 @RestController
@@ -31,10 +37,13 @@ public class ServiceController {
     }
 
     @CrossOrigin(origins = "*")
-    @GetMapping(value = "/xml/latest", produces = MediaType.APPLICATION_XML_VALUE)
-    public ResponseEntity processXMLFile() throws XMLStreamException, IOException, ParserConfigurationException, SAXException {
-        List xmlProcessingResult = this.xmlService.processCachedFile();
-        return new ResponseEntity<>(new Gson().toJson(xmlProcessingResult), HttpStatus.OK);
+    @GetMapping(value = "/xml/update", produces = MediaType.APPLICATION_XML_VALUE)
+    public ResponseEntity saveChanges() throws XMLStreamException, IOException, ParserConfigurationException, SAXException {
+        InputStreamResource resource  = new InputStreamResource(new FileInputStream(this.xmlService.updateFile()));
+        return ResponseEntity.ok()
+                .headers(new HttpHeaders())
+                .contentType(MediaType.parseMediaType("application/octet-stream"))
+                .body(resource);
     }
 
 }

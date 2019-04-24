@@ -4,7 +4,7 @@ import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
-import org.w3c.dom.Document;
+import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
@@ -29,7 +29,11 @@ public class XMLService {
     public static final String PLAN_ROW = "СтрокиПлана";
     public static final String ROW = "Строка";
     public static final String DISCIPLINE = "Дис";
-    public static final String SEMESTER = "Ном";
+    public static final String SEMESTER_ATTR = "Ном";
+    public static final String SEMESTER_NODE = "Сем";
+    public static final String TIME_ATTR = "Пр";
+    public static final String CREDIT_ATTR = "Зач";
+    public static final String ROW_ID = "ИдетификаторДисциплины";
 
     public List processFile(MultipartFile file) throws IOException, ParserConfigurationException, SAXException {
         File xmlFile = convert(file);
@@ -37,12 +41,15 @@ public class XMLService {
     }
 
     public List processFile(File file) throws ParserConfigurationException, IOException, SAXException {
-        Document document = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(file);
-        NodeList rowList = document.getElementsByTagName(ROW);
-        return this.processRowList(document, rowList);
+        NodeList rowList = DocumentBuilderFactory
+                .newInstance()
+                .newDocumentBuilder()
+                .parse(file)
+                .getElementsByTagName(ROW);
+        return this.processRowList(rowList);
     }
 
-    public List processRowList(Document document, NodeList rowList) {
+    public List processRowList(NodeList rowList) {
         List<Map> rows = new ArrayList<>();
         for (int i = 0; i < rowList.getLength(); ++i) {
             Node row = rowList.item(i);
@@ -54,9 +61,36 @@ public class XMLService {
     private void processRow(Node row, List<Map> rowsMap) {
         if (row != null && row.getAttributes().getNamedItem(DISCIPLINE) != null) {
             Map<String, Object> rowMap = new HashMap<>();
-            rowMap.put("Discipline", row.getAttributes().getNamedItem(DISCIPLINE).getNodeValue());
-            rowMap.put("Semester", row.getChildNodes().item(1).getAttributes().getNamedItem(SEMESTER).getNodeValue());
-            rowsMap.add(rowMap);
+            Map<String, Object> discipline = new HashMap<>();
+
+            List<Node> semesterNodes = new ArrayList<>();
+            NodeList childNodes = row.getChildNodes();
+            for (int i = 0; i < childNodes.getLength(); ++i) {
+                Node childNode = childNodes.item(i);
+                if (SEMESTER_NODE.equals(childNode.getNodeName())) {
+                    semesterNodes.add(childNode);
+                }
+            }
+            for(int i = 0 ; i < semesterNodes.size(); ++i){
+                Node semester = semesterNodes.get(i);
+                discipline.put("DisciplineName", row.getAttributes().getNamedItem(DISCIPLINE).getNodeValue());
+                NamedNodeMap attributes = semester.getAttributes();
+                Node timeNode = attributes.getNamedItem(TIME_ATTR);
+                if(timeNode != null){
+                    discipline.put("time", timeNode.getNodeValue());
+                }
+                if(attributes.getNamedItem(CREDIT_ATTR) == null){
+                    discipline.put("isExam", true);
+                } else {
+                    discipline.put("isExam", false);
+                }
+                rowMap.put("Discipline", discipline);
+                discipline.put("ID", row.getAttributes().getNamedItem(ROW_ID).getNodeValue());
+                rowMap.put("Semester", attributes.getNamedItem(SEMESTER_ATTR).getNodeValue());
+                rowsMap.add(rowMap);
+                discipline = new HashMap<>();
+                rowMap = new HashMap<>();
+            }
         }
     }
 
@@ -79,5 +113,9 @@ public class XMLService {
 
     public List processCachedFile() throws IOException, SAXException, ParserConfigurationException {
         return this.processFile(cachedFile);
+    }
+
+    public File updateFile() {
+        return cachedFile;
     }
 }
