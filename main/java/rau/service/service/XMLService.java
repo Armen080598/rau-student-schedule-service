@@ -8,6 +8,8 @@ import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
+import rau.service.model.DisciplineModel;
+import rau.service.model.SemesterModel;
 
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -35,12 +37,12 @@ public class XMLService {
     public static final String CREDIT_ATTR = "Зач";
     public static final String ROW_ID = "ИдетификаторДисциплины";
 
-    public List processFile(MultipartFile file) throws IOException, ParserConfigurationException, SAXException {
+    public List<SemesterModel> processFile(MultipartFile file) throws IOException, ParserConfigurationException, SAXException {
         File xmlFile = convert(file);
         return this.processFile(xmlFile);
     }
 
-    public List processFile(File file) throws ParserConfigurationException, IOException, SAXException {
+    public List<SemesterModel> processFile(File file) throws ParserConfigurationException, IOException, SAXException {
         NodeList rowList = DocumentBuilderFactory
                 .newInstance()
                 .newDocumentBuilder()
@@ -49,8 +51,8 @@ public class XMLService {
         return this.processRowList(rowList);
     }
 
-    public List processRowList(NodeList rowList) {
-        List<Map> rows = new ArrayList<>();
+    private List<SemesterModel> processRowList(NodeList rowList) {
+        List<SemesterModel> rows = new ArrayList<>();
         for (int i = 0; i < rowList.getLength(); ++i) {
             Node row = rowList.item(i);
             this.processRow(row, rows);
@@ -58,7 +60,7 @@ public class XMLService {
         return rows;
     }
 
-    private void processRow(Node row, List<Map> rowsMap) {
+    private void processRow(Node row, List<SemesterModel> rowsMap) {
         if (row != null && row.getAttributes().getNamedItem(DISCIPLINE) != null) {
             List<Node> semesterNodes = new ArrayList<>();
             NodeList childNodes = row.getChildNodes();
@@ -72,28 +74,36 @@ public class XMLService {
         }
     }
 
-    private void processSemesterNodes(List<Node> semesterNodes, Node row, List<Map> rowsMap){
-        Map<String, Object> rowMap = new HashMap<>();
-        Map<String, Object> discipline = new HashMap<>();
-        for(int i = 0 ; i < semesterNodes.size(); ++i){
-            Node semester = semesterNodes.get(i);
-            discipline.put("DisciplineName", row.getAttributes().getNamedItem(DISCIPLINE).getNodeValue());
-            NamedNodeMap attributes = semester.getAttributes();
-            Node timeNode = attributes.getNamedItem(TIME_ATTR);
-            if(timeNode != null){
-                discipline.put("time", timeNode.getNodeValue());
-            }
-            if(attributes.getNamedItem(CREDIT_ATTR) == null){
-                discipline.put("isExam", true);
-            } else {
-                discipline.put("isExam", false);
-            }
-            rowMap.put("Discipline", discipline);
-            discipline.put("ID", row.getAttributes().getNamedItem(ROW_ID).getNodeValue());
-            rowMap.put("Semester", attributes.getNamedItem(SEMESTER_ATTR).getNodeValue());
-            rowsMap.add(rowMap);
-            discipline = new HashMap<>();
-            rowMap = new HashMap<>();
+    private void processSemesterNodes(List<Node> semesterNodes, Node row, List<SemesterModel> semestersList){
+        for (Node semesterNode : semesterNodes) {
+            SemesterModel semesterModel = new SemesterModel();
+            DisciplineModel disciplineModel = new DisciplineModel();
+            semestersList.add(semesterModel);
+            NamedNodeMap attributes = semesterNode.getAttributes();
+            this.initializeDisciplineAndSemester(disciplineModel, semesterModel, row, attributes);
+        }
+    }
+
+    private void initializeDisciplineAndSemester(DisciplineModel disciplineModel,
+                                                SemesterModel semesterModel,
+                                                Node row,
+                                                NamedNodeMap attributes) {
+        this.setTimeAndExam(disciplineModel, attributes);
+        disciplineModel.setName(row.getAttributes().getNamedItem(DISCIPLINE).getNodeValue());
+        disciplineModel.setId(row.getAttributes().getNamedItem(ROW_ID).getNodeValue());
+        semesterModel.setDiscipline(disciplineModel);
+        semesterModel.setSemester(attributes.getNamedItem(SEMESTER_ATTR).getNodeValue());
+    }
+
+    private void setTimeAndExam(DisciplineModel disciplineModel, NamedNodeMap attributes){
+        Node timeNode = attributes.getNamedItem(TIME_ATTR);
+        if (timeNode != null) {
+            disciplineModel.setTime(timeNode.getNodeValue());
+        }
+        if (attributes.getNamedItem(CREDIT_ATTR) == null) {
+            disciplineModel.setExam(true);
+        } else {
+            disciplineModel.setExam(false);
         }
     }
 
