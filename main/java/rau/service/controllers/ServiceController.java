@@ -1,7 +1,6 @@
 package rau.service.controllers;
 
 import org.springframework.core.io.InputStreamResource;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -13,6 +12,7 @@ import rau.service.service.XMLService;
 
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.stream.XMLStreamException;
+import javax.xml.transform.TransformerException;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.List;
@@ -38,15 +38,13 @@ public class ServiceController {
     }
 
 
-
     @CrossOrigin(origins = "*")
     @GetMapping(value = "/xml/update", produces = MediaType.APPLICATION_XML_VALUE)
-    public ResponseEntity saveChanges() throws XMLStreamException, IOException, ParserConfigurationException, SAXException {
-        InputStreamResource resource  = new InputStreamResource(new FileInputStream(this.xmlService.updateFile()));
+    public ResponseEntity saveChanges() throws XMLStreamException, IOException, ParserConfigurationException, SAXException, TransformerException {
+        InputStreamResource resource = new InputStreamResource(new FileInputStream(this.xmlService.updateFile()));
         return ResponseEntity.ok()
-                .headers(new HttpHeaders())
+                .header("Content-disposition", "attachment;")
                 .contentType(MediaType.parseMediaType("application/octet-stream"))
                 .body(resource);
     }
-
 }

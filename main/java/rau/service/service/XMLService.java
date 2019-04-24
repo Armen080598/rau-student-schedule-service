@@ -4,6 +4,7 @@ import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+import org.w3c.dom.Document;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -13,6 +14,12 @@ import rau.service.model.SemesterModel;
 
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerConfigurationException;
+import javax.xml.transform.TransformerException;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -124,7 +131,27 @@ public class XMLService {
         fileOutputStream.close();
     }
 
-    public File updateFile() {
+    public File updateFile() throws IOException, SAXException, ParserConfigurationException, TransformerException {
+        Document document = DocumentBuilderFactory
+                .newInstance()
+                .newDocumentBuilder()
+                .parse(cachedFile);
+        NodeList rows = document.getElementsByTagName(ROW);
+        for(int i = 0 ; i  < rows.getLength(); ++i){
+            Node row = rows.item(i);
+            if(row != null && row.getAttributes().getNamedItem(DISCIPLINE) != null){
+                row.getAttributes().getNamedItem(DISCIPLINE).setNodeValue("TEST");
+            }
+        }
+        this.writeToFile(document, cachedFile);
         return cachedFile;
+    }
+
+    private void writeToFile(Document document, File file) throws TransformerException {
+        TransformerFactory transformerFactory = TransformerFactory.newInstance();
+        Transformer transformer = transformerFactory.newTransformer();
+        DOMSource domSource = new DOMSource(document);
+        StreamResult streamResult = new StreamResult(file);
+        transformer.transform(domSource, streamResult);
     }
 }
