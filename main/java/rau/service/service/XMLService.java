@@ -60,9 +60,6 @@ public class XMLService {
 
     private void processRow(Node row, List<Map> rowsMap) {
         if (row != null && row.getAttributes().getNamedItem(DISCIPLINE) != null) {
-            Map<String, Object> rowMap = new HashMap<>();
-            Map<String, Object> discipline = new HashMap<>();
-
             List<Node> semesterNodes = new ArrayList<>();
             NodeList childNodes = row.getChildNodes();
             for (int i = 0; i < childNodes.getLength(); ++i) {
@@ -71,26 +68,32 @@ public class XMLService {
                     semesterNodes.add(childNode);
                 }
             }
-            for(int i = 0 ; i < semesterNodes.size(); ++i){
-                Node semester = semesterNodes.get(i);
-                discipline.put("DisciplineName", row.getAttributes().getNamedItem(DISCIPLINE).getNodeValue());
-                NamedNodeMap attributes = semester.getAttributes();
-                Node timeNode = attributes.getNamedItem(TIME_ATTR);
-                if(timeNode != null){
-                    discipline.put("time", timeNode.getNodeValue());
-                }
-                if(attributes.getNamedItem(CREDIT_ATTR) == null){
-                    discipline.put("isExam", true);
-                } else {
-                    discipline.put("isExam", false);
-                }
-                rowMap.put("Discipline", discipline);
-                discipline.put("ID", row.getAttributes().getNamedItem(ROW_ID).getNodeValue());
-                rowMap.put("Semester", attributes.getNamedItem(SEMESTER_ATTR).getNodeValue());
-                rowsMap.add(rowMap);
-                discipline = new HashMap<>();
-                rowMap = new HashMap<>();
+            this.processSemesterNodes(semesterNodes, row, rowsMap);
+        }
+    }
+
+    private void processSemesterNodes(List<Node> semesterNodes, Node row, List<Map> rowsMap){
+        Map<String, Object> rowMap = new HashMap<>();
+        Map<String, Object> discipline = new HashMap<>();
+        for(int i = 0 ; i < semesterNodes.size(); ++i){
+            Node semester = semesterNodes.get(i);
+            discipline.put("DisciplineName", row.getAttributes().getNamedItem(DISCIPLINE).getNodeValue());
+            NamedNodeMap attributes = semester.getAttributes();
+            Node timeNode = attributes.getNamedItem(TIME_ATTR);
+            if(timeNode != null){
+                discipline.put("time", timeNode.getNodeValue());
             }
+            if(attributes.getNamedItem(CREDIT_ATTR) == null){
+                discipline.put("isExam", true);
+            } else {
+                discipline.put("isExam", false);
+            }
+            rowMap.put("Discipline", discipline);
+            discipline.put("ID", row.getAttributes().getNamedItem(ROW_ID).getNodeValue());
+            rowMap.put("Semester", attributes.getNamedItem(SEMESTER_ATTR).getNodeValue());
+            rowsMap.add(rowMap);
+            discipline = new HashMap<>();
+            rowMap = new HashMap<>();
         }
     }
 
@@ -109,10 +112,6 @@ public class XMLService {
         FileOutputStream fileOutputStream = new FileOutputStream(cachedFile);
         fileOutputStream.write(file.getBytes());
         fileOutputStream.close();
-    }
-
-    public List processCachedFile() throws IOException, SAXException, ParserConfigurationException {
-        return this.processFile(cachedFile);
     }
 
     public File updateFile() {
