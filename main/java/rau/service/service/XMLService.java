@@ -27,6 +27,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 
 @Service
@@ -44,7 +45,46 @@ public class XMLService {
     public static final String CREDIT_ATTR = "Зач";
     public static final String ROW_ID = "ИдетификаторДисциплины";
 
-    public List<SemesterModel> processFile(MultipartFile file) throws IOException, ParserConfigurationException, SAXException {
+
+    public void update(List<SemesterModel> data) throws ParserConfigurationException, IOException, SAXException, TransformerException {
+        Document document = DocumentBuilderFactory
+                .newInstance()
+                .newDocumentBuilder()
+                .parse(cachedFile);
+        NodeList rowList = document.getElementsByTagName(ROW);
+        for(int i = 0; i < rowList.getLength(); ++i) {
+            Node row = rowList.item(i);
+            if(row != null && row.getAttributes().getNamedItem(DISCIPLINE) != null){
+                this.updateRow(row, data);
+            }
+        }
+        this.writeToFile(document, cachedFile);
+    }
+
+    public void updateRow(Node row, List<SemesterModel> data) {
+        NamedNodeMap rowAttributes = row.getAttributes();
+        String id = rowAttributes.getNamedItem(ROW_ID).getNodeValue();
+        List<SemesterModel> matchingData = data.stream().filter(semesterModel -> semesterModel.getDiscipline().getId().equals(id)).collect(Collectors.toList());
+        NodeList childNodes = row.getChildNodes();
+        this.updateSemesterData(childNodes, matchingData);
+    }
+
+    public void updateSemesterData(NodeList childNodes, List<SemesterModel> matchingData) {
+        int dataCounter = 0;
+        for (int i = 0; i < childNodes.getLength(); ++i) {
+            Node childNode = childNodes.item(i);
+            if(SEMESTER_NODE.equals(childNode.getNodeName())) {
+                childNode.getAttributes().getNamedItem(SEMESTER_ATTR).setNodeValue(
+                        matchingData.get(dataCounter).getSemester()
+                );
+                ++dataCounter;
+            }
+        }
+    }
+
+    public List<SemesterModel> processFile(MultipartFile file) throws IOException,
+                                                                      ParserConfigurationException,
+                                                                      SAXException {
         File xmlFile = convert(file);
         return this.processFile(xmlFile);
     }
@@ -81,7 +121,7 @@ public class XMLService {
         }
     }
 
-    private void processSemesterNodes(List<Node> semesterNodes, Node row, List<SemesterModel> semestersList){
+    private void processSemesterNodes(List<Node> semesterNodes, Node row, List<SemesterModel> semestersList) {
         for (Node semesterNode : semesterNodes) {
             SemesterModel semesterModel = new SemesterModel();
             DisciplineModel disciplineModel = new DisciplineModel();
@@ -92,9 +132,9 @@ public class XMLService {
     }
 
     private void initializeDisciplineAndSemester(DisciplineModel disciplineModel,
-                                                SemesterModel semesterModel,
-                                                Node row,
-                                                NamedNodeMap attributes) {
+                                                 SemesterModel semesterModel,
+                                                 Node row,
+                                                 NamedNodeMap attributes) {
         this.setTimeAndExam(disciplineModel, attributes);
         disciplineModel.setName(row.getAttributes().getNamedItem(DISCIPLINE).getNodeValue());
         disciplineModel.setId(row.getAttributes().getNamedItem(ROW_ID).getNodeValue());
@@ -102,7 +142,7 @@ public class XMLService {
         semesterModel.setSemester(attributes.getNamedItem(SEMESTER_ATTR).getNodeValue());
     }
 
-    private void setTimeAndExam(DisciplineModel disciplineModel, NamedNodeMap attributes){
+    private void setTimeAndExam(DisciplineModel disciplineModel, NamedNodeMap attributes) {
         Node timeNode = attributes.getNamedItem(TIME_ATTR);
         if (timeNode != null) {
             disciplineModel.setTime(timeNode.getNodeValue());
@@ -131,18 +171,11 @@ public class XMLService {
         fileOutputStream.close();
     }
 
-    public File updateFile() throws IOException, SAXException, ParserConfigurationException, TransformerException {
+    public File downloadFile() throws IOException, SAXException, ParserConfigurationException, TransformerException {
         Document document = DocumentBuilderFactory
                 .newInstance()
                 .newDocumentBuilder()
                 .parse(cachedFile);
-        NodeList rows = document.getElementsByTagName(ROW);
-        for(int i = 0 ; i  < rows.getLength(); ++i){
-            Node row = rows.item(i);
-            if(row != null && row.getAttributes().getNamedItem(DISCIPLINE) != null){
-                row.getAttributes().getNamedItem(DISCIPLINE).setNodeValue("TEST");
-            }
-        }
         this.writeToFile(document, cachedFile);
         return cachedFile;
     }

@@ -33,15 +33,16 @@ public class ServiceController {
     }
 
     @PostMapping(value = "/update", produces = {MediaType.APPLICATION_XML_VALUE, MediaType.APPLICATION_JSON_VALUE})
-    public List<SemesterModel> saveResponse(@RequestBody List<SemesterModel> data) throws XMLStreamException, IOException, ParserConfigurationException, SAXException {
+    public List<SemesterModel> saveResponse(@RequestBody List<SemesterModel> data) throws XMLStreamException, IOException, ParserConfigurationException, SAXException, TransformerException {
+        this.xmlService.update(data);
         return data;
     }
 
 
     @CrossOrigin(origins = "*")
-    @GetMapping(value = "/xml/update", produces = MediaType.APPLICATION_XML_VALUE)
+    @GetMapping(value = "/xml/download", produces = MediaType.APPLICATION_XML_VALUE)
     public ResponseEntity saveChanges() throws XMLStreamException, IOException, ParserConfigurationException, SAXException, TransformerException {
-        InputStreamResource resource = new InputStreamResource(new FileInputStream(this.xmlService.updateFile()));
+        InputStreamResource resource = new InputStreamResource(new FileInputStream(this.xmlService.downloadFile()));
         return ResponseEntity.ok()
                 .header("Content-disposition", "attachment;")
                 .contentType(MediaType.parseMediaType("application/octet-stream"))
