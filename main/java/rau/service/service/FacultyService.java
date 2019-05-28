@@ -30,7 +30,7 @@ public class FacultyService {
     }
 
     public void insertFaculty(MultipartFile file, String facultyName) throws ParserConfigurationException, SAXException, IOException {
-        List<SemesterModel> processResult = this.xmlService.processFile(file);
+        List<SemesterModel> processResult = this.xmlService.processFile(file, facultyName);
         String plan = new Gson().toJson(processResult);
         FacultyModel facultyModel = new FacultyModel(0, facultyName, plan);
         this.immutableDao.insertFaculty(facultyModel);

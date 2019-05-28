@@ -7,6 +7,7 @@ public class SemesterModel {
     public SemesterModel() {
     }
 
+    @SuppressWarnings("unused")
     public SemesterModel(String semester, DisciplineModel discipline) {
         this.semester = semester;
         this.discipline = discipline;
@@ -28,7 +29,4 @@ public class SemesterModel {
         this.discipline = discipline;
     }
 
-    public SemesterModel copy(){
-        return new SemesterModel(this.semester, this.discipline.copy());
-    }
 }

@@ -10,14 +10,14 @@ public class DisciplineModel {
 
     }
 
-    public DisciplineModel(String id, String name, String time, boolean isExam) {
+    private DisciplineModel(String id, String name, String time, boolean isExam) {
         this.id = id;
         this.name = name;
         this.time = time;
         this.isExam = isExam;
     }
 
-    public DisciplineModel copy(){
+    DisciplineModel copy(){
         return new DisciplineModel(this.id, this.name, this.time, this.isExam);
     }
 
@@ -29,6 +29,7 @@ public class DisciplineModel {
         this.id = id;
     }
 
+    @SuppressWarnings("unused")
     public String getName() {
         return name;
     }
@@ -37,6 +38,7 @@ public class DisciplineModel {
         this.name = name;
     }
 
+    @SuppressWarnings("unused")
     public String getTime() {
         return time;
     }
@@ -45,6 +47,7 @@ public class DisciplineModel {
         this.time = time;
     }
 
+    @SuppressWarnings("unused")
     public boolean isExam() {
         return isExam;
     }

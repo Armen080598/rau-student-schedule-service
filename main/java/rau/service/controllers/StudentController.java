@@ -1,6 +1,8 @@
 package rau.service.controllers;
 
+import org.springframework.core.io.InputStreamResource;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.xml.sax.SAXException;
 import rau.service.model.StudentModel;
@@ -10,6 +12,7 @@ import rau.service.service.StudentService;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.transform.TransformerException;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.List;
 
@@ -45,5 +48,15 @@ public class StudentController {
     @PutMapping(value = "/student/update")
     public void updateStudentPlan(@RequestBody StudentModel studentModel) throws XMLStreamException, IOException, ParserConfigurationException, SAXException, TransformerException {
         this.studentService.updateStudentsPlan(studentModel);
+    }
+
+    @CrossOrigin(origins = "*")
+    @GetMapping(value = "/student/plan/{id}", produces = MediaType.APPLICATION_XML_VALUE)
+    public ResponseEntity getStudentPlan(@PathVariable int id) throws XMLStreamException, IOException, ParserConfigurationException, SAXException, TransformerException {
+        InputStreamResource resource = new InputStreamResource(new FileInputStream(this.studentService.getStudentPlan(id)));
+        return ResponseEntity.ok()
+                .header("Content-disposition", "attachment;")
+                .contentType(MediaType.parseMediaType("application/octet-stream"))
+                .body(resource);
     }
 }

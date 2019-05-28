@@ -95,5 +95,11 @@ public class ImmutableDao {
         String SQL = "UPDATE student SET plan = ? WHERE id = ?";
         this.jdbcTemplate.update(SQL, studentModel.getPlan(), studentModel.getId());
     }
+    
+    public String getStudentFacultyName(int studentId){
+        String SQL =
+            "SELECT faculty.name FROM faculty where id = (SELECT student.facultyid from student WHERE student.id = ?)";
+        return this.jdbcTemplate.queryForObject(SQL, new Object[]{studentId}, String.class);
+    }
 
 }

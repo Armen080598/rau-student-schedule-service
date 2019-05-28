@@ -1,8 +1,8 @@
 package rau.service.model;
 
 public class FacultyModelView {
-    int id;
-    String name;
+    private int id;
+    private String name;
 
     public FacultyModelView(int id, String name) {
         this.id = id;
@@ -13,6 +13,7 @@ public class FacultyModelView {
         return id;
     }
 
+    @SuppressWarnings("unused")
     public String getName() {
         return name;
     }

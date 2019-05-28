@@ -34,7 +34,7 @@ import java.util.stream.Collectors;
 @Scope(value = ConfigurableBeanFactory.SCOPE_SINGLETON)
 public class XMLService {
 
-    private static File cachedFile;
+    private static Map<String, File> cachedFiles = new HashMap<>();
 
     public static final String PLAN_ROW = "СтрокиПлана";
     public static final String ROW = "Строка";
@@ -46,7 +46,8 @@ public class XMLService {
     public static final String ROW_ID = "ИдетификаторДисциплины";
 
 
-    public void update(List<SemesterModel> data) throws ParserConfigurationException, IOException, SAXException, TransformerException {
+    public void update(List<SemesterModel> data, String facultyName) throws ParserConfigurationException, IOException, SAXException, TransformerException {
+        File cachedFile = cachedFiles.get(facultyName);
         Document document = DocumentBuilderFactory
                 .newInstance()
                 .newDocumentBuilder()
@@ -82,10 +83,10 @@ public class XMLService {
         }
     }
 
-    public List<SemesterModel> processFile(MultipartFile file) throws IOException,
+    public List<SemesterModel> processFile(MultipartFile file, String facultyName) throws IOException,
                                                                       ParserConfigurationException,
                                                                       SAXException {
-        File xmlFile = convert(file);
+        File xmlFile = convert(file, facultyName);
         return this.processFile(xmlFile);
     }
 
@@ -154,24 +155,26 @@ public class XMLService {
         }
     }
 
-    private File convert(MultipartFile file) throws IOException {
+    private File convert(MultipartFile file, String facultyName) throws IOException {
         File convFile = new File(file.getOriginalFilename());
         convFile.createNewFile();
         FileOutputStream fos = new FileOutputStream(convFile);
-        this.cacheFile(file);
+        this.cacheFile(file, facultyName);
         fos.write(file.getBytes());
         fos.close();
         return convFile;
     }
 
-    private void cacheFile(MultipartFile file) throws IOException {
-        cachedFile = new File(file.getOriginalFilename());
+    private void cacheFile(MultipartFile file, String facultyName) throws IOException {
+        File cachedFile = new File(file.getOriginalFilename());
+        cachedFiles.put(facultyName, cachedFile);
         FileOutputStream fileOutputStream = new FileOutputStream(cachedFile);
         fileOutputStream.write(file.getBytes());
         fileOutputStream.close();
     }
 
-    public File downloadFile() throws IOException, SAXException, ParserConfigurationException, TransformerException {
+    public File downloadFile(String facultyName) throws IOException, SAXException, ParserConfigurationException, TransformerException {
+        File cachedFile = cachedFiles.get(facultyName);
         Document document = DocumentBuilderFactory
                 .newInstance()
                 .newDocumentBuilder()

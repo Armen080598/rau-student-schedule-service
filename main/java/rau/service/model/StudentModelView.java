@@ -1,10 +1,10 @@
 package rau.service.model;
 
 public class StudentModelView {
-    int id;
-    int facultyId;
-    String firstName;
-    String lastName;
+    private int id;
+    private int facultyId;
+    private String firstName;
+    private String lastName;
 
     public StudentModelView(int id, int facultyId, String firstName, String lastName) {
         this.id = id;
@@ -17,14 +17,17 @@ public class StudentModelView {
         return id;
     }
 
+    @SuppressWarnings("unused")
     public int getFacultyId() {
         return facultyId;
     }
 
+    @SuppressWarnings("unused")
     public String getFirstName() {
         return firstName;
     }
 
+    @SuppressWarnings("unused")
     public String getLastName() {
         return lastName;
     }

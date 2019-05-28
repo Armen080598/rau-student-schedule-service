@@ -1,7 +1,5 @@
 package rau.service.model;
 
-import java.util.List;
-
 public class StudentModel {
     private int id;
     private int facultyId;
@@ -9,12 +7,14 @@ public class StudentModel {
     private String lastName;
     private String plan;
 
+    @SuppressWarnings("unused")
     public StudentModel() { }
 
     public StudentModel(int id){
         this.id = id;
     }
 
+    @SuppressWarnings("unused")
     public StudentModel(int id, int facultyId, String firstName, String lastName, String plan) {
         this.id = id;
         this.facultyId = facultyId;
