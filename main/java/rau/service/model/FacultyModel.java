@@ -6,12 +6,12 @@ import java.util.stream.Collectors;
 public class FacultyModel {
     private int id;
     private String name;
-    private List<SemesterModel> semesters;
+    private String plan;
 
-    public FacultyModel(int id, String name, List<SemesterModel> semesters) {
+    public FacultyModel(int id, String name, String plan) {
         this.id = id;
         this.name = name;
-        this.semesters = semesters;
+        this.plan = plan;
     }
 
     public int getId() {
@@ -22,7 +22,7 @@ public class FacultyModel {
         return name;
     }
 
-    public List<SemesterModel> getSemesters() {
-        return this.semesters.stream().map(SemesterModel::copy).collect(Collectors.toList());
+    public String getPlan() {
+        return this.plan;
     }
 }
