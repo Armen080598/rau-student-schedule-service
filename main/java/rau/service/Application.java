@@ -17,6 +17,7 @@ public class Application {
         DriverManagerDataSource ds = new DriverManagerDataSource();
         ds.setDriverClassName("org.postgresql.Driver");
         ds.setUrl(this.getDBConfig("jdbcUrl"));
+        ds.setSchema("studentschedule");
         ds.setUsername(this.getDBConfig("username"));
         ds.setPassword(this.getDBConfig("password"));
         return ds;
@@ -30,13 +31,13 @@ public class Application {
     private String getDBConfig(String key) {
         switch (key){
             case "jdbcUrl":
-                return  "jdbc:postgresql://localhost:5342/studentschedule";
+                return  "jdbc:postgresql://localhost:5432/studentschedule";
             case "username":
                 return "postgres";
             case "password":
                 return "Arm3nJan!@#";
         }
-        return null;
+        return "";
     }
 }
 

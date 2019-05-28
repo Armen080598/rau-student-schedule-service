@@ -9,6 +9,10 @@ public class StudentModel {
     private String lastName;
     private String plan;
 
+    public StudentModel(int id){
+        this.id = id;
+    }
+
     public StudentModel(int id, int facultyId, String firstName, String lastName, String plan) {
         this.id = id;
         this.facultyId = facultyId;
@@ -39,5 +43,21 @@ public class StudentModel {
 
     public void setPlan(String plan) {
         this.plan = plan;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    public void setFacultyId(int facultyId) {
+        this.facultyId = facultyId;
+    }
+
+    public void setFirstName(String firstName) {
+        this.firstName = firstName;
+    }
+
+    public void setLastName(String lastName) {
+        this.lastName = lastName;
     }
 }

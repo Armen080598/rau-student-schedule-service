@@ -10,6 +10,7 @@ import rau.service.model.FacultyModelView;
 import rau.service.model.StudentModel;
 import rau.service.model.StudentModelView;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Repository
@@ -50,18 +51,44 @@ public class ImmutableDao {
     }
 
     public List<StudentModelView> getStudentsByFacultyId(int facultyId) {
-        String SQL = "SELECT id,facultyid,firstname,lastname FROM student WHERE facultyid = ?";
-        return this.jdbcTemplate.queryForList(SQL, new Object[]{facultyId}, StudentModelView.class);
+        String SQL = "SELECT id,firstname,lastname FROM student WHERE facultyid = ?";
+        List<StudentModelView> students = new ArrayList<>();
+        this.jdbcTemplate.query(SQL, new Object[]{facultyId}, rs -> {
+            do {
+                int id = rs.getInt(1);
+                String firstName = rs.getString(2);
+                String lastName = rs.getString(3);
+                StudentModelView student = new StudentModelView(id, facultyId, firstName, lastName);
+                students.add(student);
+            } while (rs.next());
+        });
+        return students;
     }
 
     public StudentModel getStudentById(int id) {
-        String SQL = "SELECT id,facultyid,firstname,lastname,plan FROM student WHERE id = ?";
-        return this.jdbcTemplate.queryForObject(SQL, new Object[]{id}, StudentModel.class);
+        String SQL = "SELECT facultyid,firstname,lastname,plan FROM student WHERE id = ?";
+        final StudentModel studentModel = new StudentModel(id);
+        this.jdbcTemplate.query(SQL, new Object[]{id}, rs -> {
+            studentModel.setFacultyId(rs.getInt(1));
+            studentModel.setFirstName(rs.getString(2));
+            studentModel.setLastName(rs.getString(3));
+            studentModel.setPlan(rs.getString(4));
+        });
+        return studentModel;
     }
 
     public List<FacultyModelView> getFaculties() {
         String SQL = "SELECT id,name FROM faculty";
-        return this.jdbcTemplate.queryForList(SQL, FacultyModelView.class);
+        List<FacultyModelView> faculties = new ArrayList<>();
+        this.jdbcTemplate.query(SQL, rs -> {
+            do {
+                int id = rs.getInt(1);
+                String name = rs.getString(2);
+                FacultyModelView faculty = new FacultyModelView(id, name);
+                faculties.add(faculty);
+            } while (rs.next());
+        });
+        return faculties;
     }
 
     public void updateStudentPlan(StudentModel studentModel){
