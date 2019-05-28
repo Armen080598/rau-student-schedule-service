@@ -28,7 +28,22 @@ public class StudentController {
     }
 
     @GetMapping(value = "/student/{id}", produces = {MediaType.APPLICATION_XML_VALUE, MediaType.APPLICATION_JSON_VALUE})
-    public StudentModel saveResponse(@PathVariable int id) throws XMLStreamException, IOException, ParserConfigurationException, SAXException, TransformerException {
+    public StudentModel getStudentById(@PathVariable int id) throws XMLStreamException, IOException, ParserConfigurationException, SAXException, TransformerException {
         return this.studentService.getStudentById(id);
+    }
+
+    @DeleteMapping(value = "/student/{id}")
+    public void deleteStudent(@PathVariable int id) throws XMLStreamException, IOException, ParserConfigurationException, SAXException, TransformerException {
+        this.studentService.deleteStudent(id);
+    }
+
+    @PostMapping(value = "/student/add")
+    public void addStudent(@RequestBody StudentModel studentModel) throws XMLStreamException, IOException, ParserConfigurationException, SAXException, TransformerException {
+        this.studentService.addStudent(studentModel);
+    }
+
+    @PutMapping(value = "/student/update")
+    public void updateStudentPlan(@RequestBody StudentModel studentModel) throws XMLStreamException, IOException, ParserConfigurationException, SAXException, TransformerException {
+        this.studentService.updateStudentsPlan(studentModel);
     }
 }

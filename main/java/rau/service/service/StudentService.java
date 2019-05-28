@@ -27,4 +27,17 @@ public class StudentService {
     public StudentModel getStudentById(int id){
         return this.immutableDao.getStudentById(id);
     }
+
+    public void addStudent(StudentModel studentModel){
+        this.immutableDao.updateStudentPlanByFacultyPlan(studentModel);
+        this.immutableDao.insertStudent(studentModel);
+    }
+
+    public void deleteStudent(int id){
+        this.immutableDao.deleteStudent(id);
+    }
+
+    public void updateStudentsPlan(StudentModel studentModel){
+        this.immutableDao.updateStudentPlan(studentModel);
+    }
 }

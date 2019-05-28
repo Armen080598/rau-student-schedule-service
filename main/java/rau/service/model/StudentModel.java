@@ -9,6 +9,8 @@ public class StudentModel {
     private String lastName;
     private String plan;
 
+    public StudentModel() { }
+
     public StudentModel(int id){
         this.id = id;
     }

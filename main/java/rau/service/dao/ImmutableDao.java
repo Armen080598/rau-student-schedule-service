@@ -29,9 +29,9 @@ public class ImmutableDao {
                 studentModel.getLastName(), studentModel.getPlan());
     }
 
-    public void deleteStudent(StudentModel studentModel) {
+    public void deleteStudent(int id) {
         String SQL = "DELETE FROM student WHERE id = ?";
-        this.jdbcTemplate.update(SQL, studentModel.getId());
+        this.jdbcTemplate.update(SQL, id);
     }
 
     public void insertFaculty(FacultyModel facultyModel) {
@@ -39,9 +39,9 @@ public class ImmutableDao {
         this.jdbcTemplate.update(SQL, facultyModel.getName(), facultyModel.getPlan());
     }
 
-    public void deleteFaculty(FacultyModel facultyModel) {
+    public void deleteFaculty(int id) {
         String SQL = "DELETE FROM faculty WHERE id = ?";
-        this.jdbcTemplate.update(SQL, facultyModel.getId());
+        this.jdbcTemplate.update(SQL, id);
     }
 
     public void updateStudentPlanByFacultyPlan(StudentModel studentModel) {
