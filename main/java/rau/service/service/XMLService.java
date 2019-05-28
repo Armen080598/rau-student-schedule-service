@@ -166,11 +166,19 @@ public class XMLService {
     }
 
     private void cacheFile(MultipartFile file, String facultyName) throws IOException {
+        if(this.deleteOldFile(facultyName)){
+            System.out.println("Deleted Successfully");
+        }
         File cachedFile = new File(file.getOriginalFilename());
         cachedFiles.put(facultyName, cachedFile);
         FileOutputStream fileOutputStream = new FileOutputStream(cachedFile);
         fileOutputStream.write(file.getBytes());
         fileOutputStream.close();
+    }
+
+    private boolean deleteOldFile(String facultyName){
+        File oldFile = cachedFiles.get(facultyName);
+        return oldFile != null && oldFile.delete();
     }
 
     public File downloadFile(String facultyName) throws IOException, SAXException, ParserConfigurationException, TransformerException {
